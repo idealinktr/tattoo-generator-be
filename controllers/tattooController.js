@@ -97,3 +97,43 @@ exports.getPredictionStatus = async (req, res) => {
     res.status(500).json({ error: 'Failed to check prediction status' });
   }
 };
+
+exports.likeTattoo = async (req, res) => {
+ const { uid } = req.body;
+
+  try {
+    const tattoo = await Tattoo.findById(req.params.id);
+    if (!tattoo) return res.status(404).json({ error: 'Tattoo not found' });
+
+    if (!tattoo.likedBy.includes(uid)) {
+      tattoo.likedBy.push(uid);
+      tattoo.likeCount += 1;
+      await tattoo.save();
+    }
+
+    res.json({ success: true });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+};
+
+exports.unlikeTattoo = async (req, res) => {
+ const { uid } = req.body;
+
+  try {
+    const tattoo = await Tattoo.findById(req.params.id);
+    if (!tattoo) return res.status(404).json({ error: 'Tattoo not found' });
+
+    if (tattoo.likedBy.includes(uid)) {
+      tattoo.likedBy = tattoo.likedBy.filter(id => id !== uid);
+      tattoo.likeCount = Math.max(0, tattoo.likeCount - 1);
+      await tattoo.save();
+    }
+
+    res.json({ success: true });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+};
